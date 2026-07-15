@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Canton Recovery Orchestration — Proje Rehberi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a2220;
+      --muted: #5a6762;
+      --paper: #f3efe6;
+      --card: #fffdf8;
+      --line: #d4cdc0;
+      --accent: #0f6b5c;
+      --accent-soft: #d8efe9;
+      --warn: #8a4b12;
+      --warn-soft: #f5e6d4;
+      --danger: #8b2e2e;
+      --danger-soft: #f3e0e0;
+      --ok: #1f6b3a;
+      --ok-soft: #dcefe3;
+      --shadow: 0 12px 40px rgba(26, 34, 32, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #e7f2ee 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #efe6d8 0%, transparent 50%),
+        var(--paper);
+      line-height: 1.55;
+    }
+
+    .wrap {
+      width: min(980px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0 4rem;
+    }
+
+    header.hero {
+      padding: 2.2rem 0 1.5rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 2rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .85rem;
+    }
+
+    h1 {
+      font-family: Fraunces, Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.15;
+      margin: 0 0 .85rem;
+      max-width: 16ch;
+    }
+
+    .lede {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 54ch;
+      margin: 0;
+    }
+
+    nav.toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: .75rem;
+      margin: 1.75rem 0 0;
+    }
+
+    nav.toc a {
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+      font-weight: 600;
+      font-size: .95rem;
+      transition: border-color .15s, transform .15s;
+    }
+
+    nav.toc a:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    section {
+      margin: 2.5rem 0;
+    }
+
+    h2 {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.75rem;
+      margin: 0 0 1rem;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 1.5rem 0 .6rem;
+    }
+
+    p { margin: 0 0 1rem; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.4rem;
+      box-shadow: var(--shadow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      margin-bottom: .7rem;
+    }
+
+    .tag-ok { background: var(--ok-soft); color: var(--ok); }
+    .tag-no { background: var(--danger-soft); color: var(--danger); }
+    .tag-warn { background: var(--warn-soft); color: var(--warn); }
+    .tag-info { background: var(--accent-soft); color: var(--accent); }
+
+    ul.clean, ol.clean {
+      margin: 0;
+      padding-left: 1.15rem;
+    }
+
+    ul.clean li, ol.clean li { margin: .35rem 0; }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 720px) {
+      .compare { grid-template-columns: 1fr; }
+    }
+
+    .phase {
+      position: relative;
+      padding-left: 1.1rem;
+      border-left: 3px solid var(--accent);
+      margin: 1.5rem 0;
+    }
+
+    .phase-num {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: .35rem;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin: .85rem 0 1rem;
+    }
+
+    .pill {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .8rem;
+      background: #efeae0;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .3rem .7rem;
+    }
+
+    .prompt {
+      background: #18211f;
+      color: #e8f0ed;
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .82rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      margin: .75rem 0 0;
+    }
+
+    .prompt strong { color: #9fd9c8; font-weight: 500; }
+
+    .checklist label {
+      display: flex;
+      gap: .65rem;
+      align-items: flex-start;
+      padding: .45rem 0;
+      border-bottom: 1px dashed var(--line);
+      cursor: pointer;
+    }
+
+    .checklist label:last-child { border-bottom: 0; }
+    .checklist input { margin-top: .3rem; }
+
+    .callout {
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      margin: 1rem 0;
+      border: 1px solid var(--line);
+    }
+
+    .callout.warn { background: var(--warn-soft); border-color: #e2c9a8; }
+    .callout.ok { background: var(--ok-soft); border-color: #b7d8c4; }
+    .callout.info { background: var(--accent-soft); border-color: #b6d9d0; }
+    .callout.danger { background: var(--danger-soft); border-color: #e0b8b8; }
+
+    .callout strong { display: block; margin-bottom: .25rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+      background: var(--card);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      text-align: left;
+      padding: .85rem 1rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: #ece7dc;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    code {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .88em;
+      background: #ece7dc;
+      padding: .1rem .35rem;
+      border-radius: 5px;
+    }
+
+    .done-box {
+      border: 2px solid var(--accent);
+      background: linear-gradient(180deg, #f7fffc, var(--card));
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Canton Development Fund · Proje Rehberi</div>
+      <h1>Recovery Orchestration</h1>
+      <p class="lede">
+        Party / participant taşıma ve felaket kurtarmasını elle 13 adımdan
+        (offline replication baseline), tek komutluk güvenli bir orchestration aracına
+        indiren açık kaynak proje. Bu sayfa vibe-coding ile parçalı ilerlemek için
+        yazıldı - tek prompt’ta her şeyi yaptırma. Yapıma başlamadan önce: DA roadmap
+        sorusu + grant metninde AI-slop bot kuralları rehbere eklendi.
+      </p>
+      <nav class="toc" aria-label="İçindekiler">
+        <a href="#nedir">1. Fikir nedir?</a>
+        <a href="#degil">2. Ne değil?</a>
+        <a href="#cikti">3. Ne çıkacak?</a>
+        <a href="#asamalar">4. Aşamalar</a>
+        <a href="#promptlar">5. Prompt setleri</a>
+        <a href="#grant">6. Grant’e geçiş</a>
+        <a href="#kontrol">7. Kontrol listesi</a>
+      </nav>
+    </header>
+
+    <section id="nedir">
+      <h2>1. Fikri insan gibi anlatan metin</h2>
+      <div class="card">
+        <p>
+          Canton’da her kurum kendi participant’ını (node) çalıştırır; varlıklar ve sözleşmeler
+          <strong>party</strong> kimliğine bağlıdır. Bir gün node çöker, validator değişir veya
+          ortam taşınırsa operatörün yapması gereken şey belli:
+          <em>güvenli yedekten doğru şekilde ayağa kaldırmak</em>.
+        </p>
+        <p>
+          Bugün bu süreç çoğu yerde <strong>manuel</strong>: onlarca doküman satırı, konsol komutu,
+          sırayı kaçırırsan bozulma riski. Özellikle yarım kalan ACS import gibi hatalarda
+          sistem “sessizce yanlış” kalabilir; sonra
+          <code>ACS_COMMITMENT_MISMATCH</code> gibi ağrılı semptomlar çıkar.
+        </p>
+        <p>
+          <strong>Canton Recovery Orchestration</strong> bunun için ortak, açık kaynak bir araç olacak:
+          planla → doğrula → çalıştır → hata olursa dur/geri al → tatbikatı CI’da tekrarla.
+          Cüzdan değil, token değil, site değil — validator operatörlerinin kurtarma kumanda çubuğu.
+        </p>
+        <div class="callout ok">
+          <strong>Grant cümlesi (ezberle)</strong>
+          “Canton’da party/participant recovery hâlâ manuel; biz key’e dokunmadan dry-run migration,
+          backup doğrulama ve restore drill sunan open-source orchestration CLI getiriyoruz.”
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:1rem;">
+        <div class="card">
+          <span class="tag tag-ok">Neden bu?</span>
+          <ul class="clean">
+            <li>Fon “resilience / operasyonel basitlik / common good” istiyor</li>
+            <li>CWIF gibi key export tuzağı yok</li>
+            <li>DEX/cüzdan/SDK rafı kadar dolu değil</li>
+            <li>Demo net: taşı → bilerek boz → yakala → düzelt</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag tag-info">Başarı tanımı</span>
+          <ul class="clean">
+            <li>LocalNet’te uçtan uca recovery senaryosu tek komutla</li>
+            <li>Dry-run (dokunmadan plan)</li>
+            <li>Idempotent + kaldığı yerden devam (resume)</li>
+            <li>Kasten bozuk restore’u otomatik yakalama</li>
+            <li>CI’da koşan drill</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="degil">
+      <h2>2. Kapsam duvarı (bunları sakın ekleme)</h2>
+      <div class="compare">
+        <div class="card">
+          <span class="tag tag-ok">Yapacağız</span>
+          <ul class="clean">
+            <li>Offline party replication akışının orchestration’ı</li>
+            <li>Preflight kontrolleri (backup tazeliği, flag’ler, vetting…)</li>
+            <li>Dry-run / plan mode</li>
+            <li>Post-condition doğrulama</li>
+            <li>Broken ACS import tatbikatı</li>
+            <li>Runbook + CI pipeline</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag tag-no">Yapmayacağız</span>
+          <ul class="clean">
+            <li>Key / seed / mnemonic export formatı (CWIF öldü)</li>
+            <li>Yeni cüzdan veya dApp UI</li>
+            <li>Hard domain / synchronizer migration (LSU alanı)</li>
+            <li>Party offboarding “sihirli taşı” (protokolde yok)</li>
+            <li>Dashboard / observability platformu (COOT tuzağı)</li>
+            <li>Genel validator ops süiti</li>
+            <li>Decentralized party membership (o ayrı proje)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn">
+        <strong>COOT uyarısı</strong>
+        Kapsamı “güzel bir ops paneli”ne büyütürsen önceki ölmüş projelerle aynı çukura düşersin.
+        Tek iş: <em>recovery orchestration</em>.
+      </div>
+    </section>
+
+    <section id="cikti">
+      <h2>3. En sonda elde edilecek şey</h2>
+      <div class="card done-box">
+        <h3 style="margin-top:0;">Hedef repo yapısı (örnek)</h3>
+        <div class="prompt">canton-recovery-orchestration/
+├── README.md                 # ne, neden, nasıl demo
+├── docs/
+│   ├── manual-baseline.md    # elle yapılan 13 adım + pre/post koşullar
+│   ├── threat-model.md       # key yok, neye dokunuyoruz
+│   └── runbook.md            # operatör prosedürü
+├── src/                      # CLI (Go/TS/Python — seçimin)
+│   ├── plan.ts
+│   ├── preflight.ts
+│   ├── execute.ts
+│   ├── verify.ts
+│   └── resume.ts
+├── scenarios/
+│   └── offline-party-replication/
+├── fixtures/                 # LocalNet senaryo verisi
+├── scripts/
+│   └── drill-broken-acs.sh
+└── .github/workflows/
+    └── recovery-drill.yml</div>
+        <h3>Kullanıcıya görünen deneyim</h3>
+        <div class="prompt"># 1) Plan — hiçbir şeye dokunma
+cro plan --scenario offline-party-replication
+
+# 2) Preflight
+cro preflight --target participant-b
+
+# 3) Çalıştır (idempotent)
+cro apply --scenario offline-party-replication
+
+# 4) Yarıda kaldıysa
+cro resume
+
+# 5) Tatbikat
+cro drill --fault broken-acs-import</div>
+      </div>
+    </section>
+
+    <section id="asamalar">
+      <h2>4. Aşama aşama yol haritası</h2>
+      <p>
+        Aşağıdaki sıralama bilinçli. Her aşamanın sonunda <strong>somut çıktı</strong> olmalı.
+        Sonraki aşamaya geçmeden önceki “bitti kriteri”ni tamamla.
+      </p>
+
+      <div class="phase card">
+        <div class="phase-num">AŞAMA 0 · 2–7 gün (ortam zorluğu değişken)</div>
+        <h3>Roadmap teyidi + ortam + kavramsal netlik</h3>
+        <div class="meta-row">
+          <span class="pill">önce: DA roadmap sorusu</span>
+          <span class="pill">sonra: 2-participant LocalNet</span>
+        </div>
+
+        <div class="callout danger">
+          <strong>0A · DA roadmap sorusu (bedava, ~1 gün) — PoC’den ÖNCE</strong>
+          Champion işi değil. Soru: party-level recovery / replication orchestration
+          DA’nın yakın Splice sürümünde geliyor mu?<br /><br />
+          Kime: Itai Segall / Wayne Collier (veya Node Ops / Party Portability çevresi).<br />
+          Tek cümle: <em>“Party-level replication/recovery orchestration Splice 3.5+ roadmap’inizde mi?”</em><br /><br />
+          Cevap “geliyor / zaten yapıyoruz” ise: <strong>dur</strong>. 4 haftalık PoC çöp olur.
+          Hard Migration #294 tam bundan öldü (eski docs’a göre yazıldı, Splice çözmüştü).<br />
+          Cevap “yok / bizde değil” veya sessizlik + release notes’ta iz yok: devam.
+        </div>
+
+        <p><strong>0B · Ortam (roadmap “yok” dedikten sonra)</strong></p>
+        <ol class="clean">
+          <li>Resmi Canton / Splice LocalNet dokümanını bul (cn-quickstart / mevcut local stack).</li>
+          <li>İki bağımsız participant’lı topolojiyi kaldır (recovery senaryosunun gerçek ön koşulu bu).</li>
+          <li>Party, participant, ACS, topology kelimelerini kendi cümlelerinle not et.</li>
+          <li>Bu rehberdeki “yapmayacağız” listesini README’ye kilitle.</li>
+        </ol>
+        <div class="callout warn">
+          <strong>Darboğaz (erken bil)</strong>
+          Standart LocalNet / cn-quickstart genelde tek-container, sabit topoloji ile gelir.
+          Party replication için iki bağımsız participant çoğu zaman elle HOCON / compose
+          ister. canton-compose (#93) bunu birebir problem olarak tanımlamış:
+          advanced topologies hand-wired. <strong>2-participant topoloji kurulamıyorsa
+          önce onu çöz; PoC’nin gerçek ön koşulu budur.</strong> Kurulum 1–2 gün değil,
+          bir haftaya yayılabilir. Kurulamıyorsa sonraki tüm aşamalar tıkanır.
+        </div>
+        <div class="callout info">
+          <strong>Bitti kriteri</strong>
+          DA roadmap cevabı not edildi (veya yazılı teyit denemesi yapıldı);
+          <em>iki participant</em> LocalNet ayakta ve birbirini görebiliyor;
+          recovery docs linkleri bir dosyada toplu.
+        </div>
+      </div>
+
+      <div class="phase card">
+        <div class="phase-num">AŞAMA 1 · Hafta 1</div>
+        <h3>Manuel baseline (en kritik aşama)</h3>
+        <div class="meta-row">
+          <span class="pill">amaç: acıyı ölç</span>
+          <span class="pill">çıktı: 13-adım defteri</span>
+        </div>
+        <p>
+          Henüz tool yazma. Offline party replication / backup-restore senaryosunu
+          <strong>elle</strong> bir kez baştan sona yap. Her adım için yaz:
+        </p>
+        <ul class="clean">
+          <li>Komut / UI / doküman adımı</li>
+          <li>Ön koşul (pre-condition)</li>
+          <li>Son koşul (post-condition) — nasıl “başarılı”yı ölçtün?</li>
+          <li>Yanlış yapılırsa ne olur?</li>
+        </ul>
+        <div class="callout warn">
+          <strong>Fail koşulu (fikri öldüren test)</strong>
+          Eğer tüm akış mevcut bir bootstrap script’iyle ~20 satırda zaten kolayca çözülüyorsa,
+          otomasyon değeri yok demektir — scope’u yeniden düşün veya bırak.
+        </div>
+        <div class="callout ok">
+          <strong>Bitti kriteri</strong>
+          <code>docs/manual-baseline.md</code> dosyası dolu; her adımın pre/post condition’ı makine-okunur
+          (sonraki kod bunları assert edecek).
+        </div>
+      </div>
+
+      <div class="phase card">
+        <div class="phase-num">AŞAMA 2 · Hafta 2</div>
+        <h3>Tek happy-path komutu (iske + resume)</h3>
+        <div class="meta-row">
+          <span class="pill">amaç: wrapper değil, orchestration</span>
+          <span class="pill">çıktı: cro apply</span>
+        </div>
+        <p><strong>Ne yazılacak?</strong></p>
+        <ul class="clean">
+          <li>Adım makinesi (state machine): step-1 … step-N</li>
+          <li>Her adım sonrası state kaydı (hangi adım tamam?)</li>
+          <li>Ortalarda kırılınca <code>resume</code> ile kaldığı yerden devam</li>
+          <li>Aynı komutu ikinci kez çalıştırınca güvenli no-op (idempotent)</li>
+        </ul>
+        <div class="callout ok">
+          <strong>Bitti kriteri</strong>
+          Happy path LocalNet’te uçtan uca yeşil. Ortada process kill edip <code>resume</code> ile bitirebiliyorsun.
+          README’de 3 dakikalık “manuel vs otomatik” anlatımı var.
+        </div>
+      </div>
+
+      <div class="phase card">
+        <div class="phase-num">AŞAMA 3 · Hafta 3</div>
+        <h3>Dry-run + preflight</h3>
+        <div class="meta-row">
+          <span class="pill">amaç: dokunmadan plan</span>
+          <span class="pill">çıktı: cro plan / preflight</span>
+        </div>
+        <p>Preflight örnekleri (dokümana göre uyarlanır):</p>
+        <ul class="clean">
+          <li>Backup yaşı / tazelik penceresi</li>
+          <li>Onboarding / migration flag’leri</li>
+          <li>Pruning penceresi uygun mu?</li>
+          <li>Package vetting durumu</li>
+          <li>Hedef participant sağlığı</li>
+        </ul>
+        <p>
+          <code>plan</code> komutu hiçbir mutate etmeden “şunu yapacağım” listesini basmalı.
+        </p>
+        <div class="callout ok">
+          <strong>Bitti kriteri</strong>
+          Kasıtlı kötü preflight’ta (eski backup vs.) komut net hata veriyor; iyi durumda plan çıktısı okunaklı.
+        </div>
+      </div>
+
+      <div class="phase card">
+        <div class="phase-num">AŞAMA 4 · Hafta 4</div>
+        <h3>Fault drill + CI</h3>
+        <div class="meta-row">
+          <span class="pill">amaç: değeri kanıtla</span>
+          <span class="pill">çıktı: cro drill + GitHub Action</span>
+        </div>
+        <p>
+          Bilerek yarım / bozuk ACS import üret. Araç
+          mismatch’i (veya dokümandaki eşdeğer hatayı) yakalasın,
+          net teşhis + güvenli durma / rollback yolu göstersin.
+        </p>
+        <div class="callout danger">
+          <strong>Fail koşulu</strong>
+          Mismatch’i deterministik üretemiyor veya yakalayamıyorsan — “console script wrapper”
+          itirazı haklı çıkar. Grant öncesi bunu çöz veya beyanı küçült.
+        </div>
+        <div class="callout ok">
+          <strong>Bitti kriteri</strong>
+          CI’da yeşil drill; kısa demo video (2–4 dk); threat-model notu (“key’e dokunmuyoruz”).
+        </div>
+      </div>
+
+      <div class="phase card">
+        <div class="phase-num">AŞAMA 5 · Grant paketi</div>
+        <h3>Proposal + milestone metni</h3>
+        <div class="meta-row">
+          <span class="pill">hedef bant: 400–650k CC</span>
+          <span class="pill">3 milestone</span>
+        </div>
+        <ol class="clean">
+          <li><code>canton-dev-fund</code> template’ini doldur (tek objective).</li>
+          <li>Adoption kriteri yaz (örn. NaaS/validator dry-run, CI kullanan repo sayısı).</li>
+          <li>COOT / Migration Lens / Decentralization Manager ile 1’er cümle ayrım.</li>
+          <li>PR aç → ihtiyaç halinde <code>needs-champion</code> sürecine gir.</li>
+        </ol>
+        <div class="callout info">
+          <strong>Önerilen 3 milestone iskeleti</strong>
+          <ol class="clean">
+            <li>M1: Offline party replication orchestration + resume + docs</li>
+            <li>M2: Preflight/plan + fault drill + CI</li>
+            <li>M3: 2+ harici operatör/NaaS adoption + hardening</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="promptlar">
+      <h2>5. Vibe-coding: sırayla kullanılacak prompt’lar</h2>
+      <p>
+        Her kutuyu <strong>ayrı sohbette / ayrı turda</strong> kullan. “Hepsini birden yap” deme.
+        Bir aşamanın bitti kriteri yeşil olmadan sonrakine geçme.
+      </p>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <span class="tag tag-warn">Prompt A0a — DA roadmap (önce bunu)</span>
+        <div class="prompt">Kısa mail / Slack / forum mesajı taslağı yaz.
+
+Alıcı bağlamı: Digital Asset / Splice maintainers (Itai Segall veya Wayne Collier).
+Soru tek ve net: Party-level replication veya recovery orchestration Splice yakın roadmap'inde mi?
+Amaç: Hard Migration #294 gibi "protokol zaten çözdü" sürprizine düşmemek.
+
+Kurallar:
+- Satış pitch'i yok
+- Grant diline boğma
+- 5-8 cümleyi geçme
+- Em-dash (—) kullanma; düz tire (-) kullan</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <span class="tag tag-info">Prompt A0b — Ortam (sadece roadmap "yok" ise)</span>
+        <div class="prompt">Canton Recovery Orchestration için LocalNet kurma aşamasındayız.
+DA roadmap teyidi: party-level recovery tooling yakında gelmiyor (not edilmiş).
+
+GÖREV: İKİ BAĞIMSIZ PARTICIPANT'lı topoloji kur (tek-container varsayılan LocalNet yetmez).
+cn-quickstart / standart LocalNet fixed topology ile geliyorsa: HOCON veya compose ile
+hand-wire et. canton-compose #93 bu problemi tarif ediyor - advanced topology gerekir.
+
+KISIT: Recovery tool kodu yazma. Sadece ortam + doğrulama.
+ÖNEMLİ: 2-participant kurulamıyorsa bunu açıkça "BLOCKER" diye yaz; PoC'ye geçme.
+ÇIKTI:
+1) Kurulum komutları / config diff'leri
+2) İki participant'ın birbirini gördüğünü kanıtlayan sağlık kontrolü
+3) "ortam hazır" checklist
+4) Takılırsan: hangi dosyayı elle düzenledin, ne kırıldı</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <span class="tag tag-info">Prompt A1 — Manuel baseline</span>
+        <div class="prompt">Amaç: Offline party replication / backup-restore'u LocalNet'te MANUEL belgelemek.
+
+GÖREV: Resmi Canton/Splice dokümanına dayanarak adım adım prosedür çıkar.
+Her adım için zorunlu alanlar:
+- adım adı
+- komut(lar)
+- pre-condition
+- post-condition (nasıl assert edilir?)
+- başarısızlık belirtisi
+
+KISIT: Otomasyon kodu yok. Spekülasyon yok; docs'ta yoksa "bilinmiyor / doğrulanacak" yaz.
+ÇIKTI: docs/manual-baseline.md içeriği (Tam Türkçe açıklama + komutlar İngilizce kalabilir).</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <span class="tag tag-info">Prompt A2 — State machine CLI</span>
+        <div class="prompt">manual-baseline.md elimizde. Şimdi SADECE happy-path orchestration CLI iskeleti.
+
+Gereksinimler:
+- adım state machine
+- apply
+- resume (yarıda kalan yerden)
+- idempotent tekrar çalıştırma
+- key/seed/mnemonic'e dokunma
+- dashboard yok
+
+Dil öner: TypeScript veya Go (basit tut).
+ÇIKTI: minimum çalışan CLI + README kullanım örneği.
+ÖNCE planı yaz, onayımı bekle, sonra kodla.</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <span class="tag tag-info">Prompt A3 — Plan + preflight</span>
+        <div class="prompt">Mevcut CLI'ya ekle:
+1) cro plan  → mutate etmeden yapılacaklar listesi
+2) cro preflight → başarısız olursa apply'ı engelle
+
+Preflight kurallarını manual-baseline.md post/pre condition'larından üret.
+Yeni özellik ekleme. Test edilebilir hale getir.</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <span class="tag tag-info">Prompt A4 — Fault drill + CI</span>
+        <div class="prompt">Fault injection senaryosu ekle: broken/partial ACS import.
+Araç hatayı yaklasın, anlaşılır teşhis bas, güvenli şekilde dursun.
+Sonra GitHub Actions workflow'u ekle: LocalNet drill Job.
+Kapsam dışı: UI, metrics dashboard, alerting platformu.
+Demo için README'ye "kanıt adımları" bölümü yaz.</div>
+      </div>
+
+      <div class="card">
+        <span class="tag tag-warn">Prompt A5 — Grant metni (+ AI-slop bot koruması)</span>
+        <div class="prompt">PoC hazır. canton-dev-fund proposal taslağı yaz.
+
+Kurallar:
+- tek objective
+- key export yok
+- COOT (#433), Migration Lens (#34), Decentralization Manager ile ayrım cümleleri
+- 3 milestone
+- funding 400k–650k CC bandında
+- adoption ölçütü olsun
+- template yapısına uy (abstract, specification, milestones, acceptance, funding)
+
+AI-SLOP / aipricheck.yml KISITLARI (zorunlu):
+- Em-dash (—) yok. Sadece düz tire (-) veya normal cümle.
+- Madde satırlarını noktalı virgülle (;) bitirme.
+- Uydurma terim yok: sharding, Canton chain, Daml VM, L2, gas fee, smart account vb. Canton jargonunda yoksa yazma.
+- Abartılı AI kalıpları yok ("revolutionize", "seamless", "cutting-edge", "leverage synergies").
+- Her teknik iddia docs veya PoC'ye dayansın; uydurma metrik yok.
+- Kısa, somut, operatör dilinde yaz.
+
+Önce outline, sonra full markdown.
+Outline onaylanmadan uzun metin üretme.</div>
+      </div>
+    </section>
+
+    <section id="grant">
+      <h2>6. Grant’e giderken çerçeve</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Konu</th>
+            <th>Ne diyeceksin?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Problem</td>
+            <td>Party-level recovery manuel, hataya açık, tekrarlanabilir drill yok.</td>
+          </tr>
+          <tr>
+            <td>Çözüm</td>
+            <td>Open-source orchestration CLI: plan / preflight / apply / resume / drill.</td>
+          </tr>
+          <tr>
+            <td>Neden şimdi?</td>
+            <td>LSU synchronizer-level’ı çözdü; party-level tooling roadmap’te görünmüyor.</td>
+          </tr>
+          <tr>
+            <td>Güvenlik</td>
+            <td>Key material’e dokunmuyoruz; ACS/topology orchestration.</td>
+          </tr>
+          <tr>
+            <td>Rakip ayrımı</td>
+            <td>#34 dar verification; COOT şişkin ops platformu; Decentralization Manager eşik/üyelik.</td>
+          </tr>
+          <tr>
+            <td>Para</td>
+            <td>400–650k CC, 3 milestone, adoption kapılı son dilim.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout info" style="margin-top:1rem;">
+        <strong>Champion gerçeği</strong>
+        PR açınca <code>needs-champion</code> aşamasına gelebilir; mail/SIG ile ilgilenir gelir.
+        Ama kimse sahiplenmezse (COOT gibi) dosya ölür. PoC’n ne kadar ikna ediciyse
+        champion bulmak o kadar kolay.
+      </div>
+    </section>
+
+    <section id="kontrol">
+      <h2>7. Canlı kontrol listesi</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" /> DA’ya party-level recovery roadmap sorusu soruldu / cevap not edildi</label>
+        <label><input type="checkbox" /> Cevap “geliyor” ise proje DURDURULDU (PoC’ye başlanmadı)</label>
+        <label><input type="checkbox" /> İki bağımsız participant LocalNet ayakta (tek-container yetmez; kurulamadıysa PoC’ye geçilmedi)</label>
+        <label><input type="checkbox" /> İki participant birbirini görüyor / sağlık kontrolü geçti</label>
+        <label><input type="checkbox" /> Manuel recovery adımları pre/post condition ile yazıldı</label>
+        <label><input type="checkbox" /> “20 satırlık script yeter” fail testi geçti (otomasyon değeri var)</label>
+        <label><input type="checkbox" /> <code>apply</code> happy-path yeşil</label>
+        <label><input type="checkbox" /> <code>resume</code> yarıda kalınca çalışıyor</label>
+        <label><input type="checkbox" /> İkinci çalıştırma idempotent</label>
+        <label><input type="checkbox" /> <code>plan</code> mutate etmiyor</label>
+        <label><input type="checkbox" /> <code>preflight</code> kötü durumda engelliyor</label>
+        <label><input type="checkbox" /> Broken ACS drill yakalanıyor</label>
+        <label><input type="checkbox" /> CI drill yeşil</label>
+        <label><input type="checkbox" /> Demo video + README kanıt bölümü</label>
+        <label><input type="checkbox" /> Threat model: key’e dokunulmuyor yazılı</label>
+        <label><input type="checkbox" /> Grant taslağı dar scope + 400–650k CC</label>
+        <label><input type="checkbox" /> Proposal’da em-dash / AI-slop / uydurma jargon yok</label>
+        <label><input type="checkbox" /> Rakip ayrım cümleleri eklendi</label>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        <strong>Canton Recovery Orchestration Rehberi</strong> · Grant odaklı dar kapsam ·
+        Vibe-coding için parçalı prompt seti içerir.
+      </p>
+      <p>
+        Hatırlatma: Değer “komut sarmalayıcı”da değil;
+        <em>idempotency + resume + preflight + post-condition + fault drill</em> demetinde.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

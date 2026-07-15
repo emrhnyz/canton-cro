@@ -1,0 +1,13 @@
+# canton probe — exit=0
+--- stdout ---
+CRO_VAR participantsReachable=true
+CRO_VAR healthPingOk=true
+CRO_VAR partyHostedOnSource=true
+CRO_VAR partyAlreadyOnTarget=false
+CRO_VAR sourceHasPackages=true
+CRO_VAR targetConnectedToSync=true
+CRO_VAR partyHasContracts=true
+CRO_PROBE_OK
+
+--- stderr ---
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8

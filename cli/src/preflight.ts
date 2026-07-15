@@ -169,6 +169,29 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
     },
   },
   {
+    id: "party_not_already_on_target",
+    baselineRef: "Adım 3/10: target party'yi replication İLE almalı (öncesinde değil)",
+    severity: "warn",
+    description: "Party should not already be hosted on target before replication",
+    evaluate: ({ facts }) => {
+      if (facts.partyAlreadyOnTarget === true) {
+        return {
+          pass: true,
+          detail:
+            "partyAlreadyOnTarget=true — replication may already be complete or in progress; " +
+            "resume the original run instead of starting a fresh one",
+        };
+      }
+      return {
+        pass: true,
+        detail:
+          facts.partyAlreadyOnTarget === false
+            ? "partyAlreadyOnTarget=false"
+            : "partyAlreadyOnTarget unset (stub facts — live probe fills this)",
+      };
+    },
+  },
+  {
     id: "acs_mismatch_expected_info",
     baselineRef: "Beklenen gürültü: onboarding ACS commitment mismatch",
     severity: "info",

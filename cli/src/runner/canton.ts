@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { StepId } from "../steps.js";
@@ -243,7 +243,26 @@ println("CRO_VAR onboardingFlagCleared=true")
 // ---------------------------------------------------------------------------
 
 /** JVM locale pin: TR Windows breaks Daml-LF identifiers (TIME -> TİME). */
-const LOCALE_JAVA_OPTS = "-Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8";
+export const LOCALE_JAVA_OPTS = "-Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8";
+
+/** Run a console script against the daemon via remote config (shared by steps + probes). */
+export function execConsoleScript(
+  settings: CantonRunnerSettings,
+  scriptPath: string,
+): SpawnSyncReturns<string> {
+  return spawnSync(
+    settings.bin,
+    ["run", scriptPath, "-c", settings.remoteConf, "--log-level-stdout=WARN"],
+    {
+      encoding: "utf8",
+      timeout: settings.stepTimeoutMs ?? 300_000,
+      env: {
+        ...process.env,
+        JAVA_TOOL_OPTIONS: process.env.JAVA_TOOL_OPTIONS ?? LOCALE_JAVA_OPTS,
+      },
+    },
+  );
+}
 
 export function runCantonStep(ctx: StepContext, cwd = process.cwd()): StepResult {
   const { runId, stepId, config } = ctx;
@@ -301,18 +320,7 @@ export function runCantonStep(ctx: StepContext, cwd = process.cwd()): StepResult
   const scriptPath = join(scriptsDir, `${stepId}.sc`);
   writeFileSync(scriptPath, script, "utf8");
 
-  const res = spawnSync(
-    settings.bin,
-    ["run", scriptPath, "-c", settings.remoteConf, "--log-level-stdout=WARN"],
-    {
-      encoding: "utf8",
-      timeout: settings.stepTimeoutMs,
-      env: {
-        ...process.env,
-        JAVA_TOOL_OPTIONS: process.env.JAVA_TOOL_OPTIONS ?? LOCALE_JAVA_OPTS,
-      },
-    },
-  );
+  const res = execConsoleScript(settings, scriptPath);
 
   const logPath = join(logsDir, `${stepId}.log`);
   writeFileSync(

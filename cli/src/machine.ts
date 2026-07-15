@@ -9,7 +9,7 @@ import {
 } from "./state.js";
 import { runStubStep } from "./runner/stub.js";
 import { makeCantonRunner } from "./runner/canton.js";
-import { loadFacts } from "./facts.js";
+import { gatherFacts } from "./runner/probe.js";
 import { evaluatePreflight, formatPreflightReport } from "./preflight.js";
 import { AcsImportFaultError, formatDiagnosis } from "./fault.js";
 
@@ -95,7 +95,8 @@ export async function runMachine(
   }
 
   if (mode === "apply" && requirePreflight) {
-    const facts = loadFacts(runId, cwd);
+    // canton runner: live-probe the environment; stub: declared facts.json.
+    const facts = gatherFacts(runId, state.config, cwd);
     const report = evaluatePreflight(state.config, facts);
     writePreflightResult(
       runId,

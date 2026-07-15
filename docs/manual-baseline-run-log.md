@@ -115,3 +115,35 @@ post-condition + drill demeti.
   vetting, party hosting) — bu koşumun script'leri probe'ların hazır tarifi.
 - A8: H2 dosya kopyasıyla gerçek backup → kasıtlı yarım/bozuk import → gerçek
   `ACS_COMMITMENT_MISMATCH`/`IMPORT_ACS_ERROR` yakala → backup'tan restore → resume.
+
+---
+
+# Ek: A7 koşum kaydı — Live preflight probe'ları (2026-07-16)
+
+**Değişiklik:** `runner = canton` iken preflight, facts.json'daki beyan yerine tek bir remote
+console koşumuyla ortamı gerçekten yokluyor (`cli/src/runner/probe.ts`). Probe edilebilen 7
+gerçek: participant health, cross-ping, party source'ta hosted, **party target'ta zaten hosted
+mı** (yeni uyarı), DAR varlığı, target synchronizer bağlantısı, party ACS'i dolu mu.
+Operatör niyeti kalanlar (backupPlanReady, willSetOnboardingFlag, storageKind) beyan olarak
+kalıyor; birleşik sonuç probe damgasıyla facts.json'a geri yazılıyor (denetlenebilir).
+
+## Kanıtlar
+
+- **Pozitif (run live-a7):** `probe: live probe ok` → `preflight: PASS` → 13/13 adım →
+  idempotent no-op → `CRO_ASSERT_OK`. Probe'lu facts: `localnet/out/live-a7-facts.json`
+  (`partyAlreadyOnTarget=false` — preflight anında replication henüz yapılmamıştı, doğru).
+- **Negatif (daemon kapalı):** `live probe failed ... treating environment as DOWN (all
+  probed facts false)` → `preflight: FAIL` → `participants_reachable` ERR → apply bloke.
+  Ölü ortam asla yeşil görünmüyor (fail-safe).
+- Testler: 20/20 (probe parse/merge, fail-safe, dead-console'da apply'ın hiç adım
+  koşturmadan bloke olması, yeni warn check).
+
+## Koşumda yakalanan gerçek sapma
+
+- `import scala.util.Try` Canton 3.5.8 console REPL'inde patlıyor:
+  `error while loading ... Add -Ytasty-reader to scalac options` (Scala 2 REPL,
+  scala/util TASTy dosyalarını okuyamıyor). Çözüm: import'suz `try/catch`
+  (`def safely(body: => Boolean)`). A6 adım script'lerinde bu import olmadığı için
+  görünmemişti — console script'lerinde `scala.util._` import'undan kaçının.
+- `parties.hosted(filterParty = ...)` 3.5.8'de doğrulandı (source true / target false,
+  replication sonrası target true).

@@ -1,0 +1,17 @@
+{
+  "participantsReachable": true,
+  "healthPingOk": true,
+  "partyHostedOnSource": true,
+  "sourceHasPackages": true,
+  "targetConnectedToSync": true,
+  "willSetOnboardingFlag": true,
+  "backupPlanReady": true,
+  "storageKind": "h2",
+  "partyHasContracts": true,
+  "partyAlreadyOnTarget": false,
+  "probe": {
+    "at": "2026-07-15T22:51:01.527Z",
+    "source": "live-canton-probe",
+    "note": "live probe ok (log: /Users/erenyegit/dev/canton-cro/cli/runs/live-a7/logs/preflight-probe.log)"
+  }
+}

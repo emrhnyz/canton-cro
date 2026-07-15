@@ -10,7 +10,8 @@ import {
   type RunConfig,
 } from "./state.js";
 import { formatStatus, runMachine } from "./machine.js";
-import { defaultStubFacts, loadFacts, writeFacts } from "./facts.js";
+import { defaultStubFacts, writeFacts } from "./facts.js";
+import { gatherFacts } from "./runner/probe.js";
 import { buildPlan, formatPlan } from "./plan.js";
 import { evaluatePreflight, formatPreflightReport } from "./preflight.js";
 
@@ -113,7 +114,11 @@ program
   .option("--config <path>", "Override config.json path")
   .action((opts: { run: string; config?: string }) => {
     const cfg = loadConfig(opts.run, process.cwd(), opts.config);
-    const facts = loadFacts(opts.run);
+    // canton runner: live probe (merged + persisted); stub: declared facts.json.
+    const facts = gatherFacts(opts.run, cfg);
+    if (facts.probe) {
+      console.log(`probe: ${facts.probe.note ?? facts.probe.source} @ ${facts.probe.at}`);
+    }
     const report = evaluatePreflight(cfg, facts);
     writePreflightResult(opts.run, {
       ok: report.ok,

@@ -29,6 +29,16 @@ export const PreflightFactsSchema = z.object({
    * Baseline marks contract assert as "bilinmiyor" — warn only if explicitly false.
    */
   partyHasContracts: z.boolean().optional(),
+  /** Live probe: party already hosted on target (re-run / stale-state hint). */
+  partyAlreadyOnTarget: z.boolean().optional(),
+  /** Set when facts came from a live probe (runner = canton). */
+  probe: z
+    .object({
+      at: z.string(),
+      source: z.string(),
+      note: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type PreflightFacts = z.infer<typeof PreflightFactsSchema>;

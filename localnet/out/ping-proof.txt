@@ -1,0 +1,12 @@
+# Health proof — 2026-07-15 (en_US locale run)
+# Command: canton.bat run examples\01-simple-topology\simple-ping.canton -c examples\01-simple-topology\simple-topology.conf
+# Exit code: 0
+
+2026-07-15 22:37:18,863 Starting ping PingRequest(id = '1535fdfb-e5d8-4306-baca-0c57d7acb988', target = participant1::1220d3b963d6..., timeout = 30s)
+2026-07-15 22:37:22,073 Successfully submitted ping id=1535fdfb-e5d8-4306-baca-0c57d7acb988 ... waiting for response
+2026-07-15 22:37:22,162 Observed creation of ping contract, waiting for archival by responder
+2026-07-15 22:37:22,162 participant1::1220d3b963d6... responding to a ping from participant2::12200f5da490...
+2026-07-15 22:37:22,774 Observed archival of ping contract after 3910 milliseconds
+2026-07-15 22:37:23,042 Shutdown complete.
+
+RESULT: OK — iki bağımsız participant birbirini görüyor.

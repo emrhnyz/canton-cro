@@ -1,0 +1,28 @@
+{
+  "name": "cro",
+  "version": "0.1.0",
+  "description": "Canton Recovery Orchestration CLI (happy-path skeleton)",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "cro": "./dist/index.js"
+  },
+  "scripts": {
+    "cro": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

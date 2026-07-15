@@ -100,6 +100,23 @@ bash cli/scripts/live-drill.sh
 Not: memory storage ACS import'u desteklemiyor (`IMPORT_ACS_ERROR`) — bu yüzden
 `localnet/cro-topology.conf` H2 file storage kullanır.
 
+### C3) REAL broken-ACS drill — kır, teşhis et, geri yükle, tamamla (A8 kanıtı)
+
+Simülasyon değil: export edilen snapshot'ın pristine kopyası alınır, canlı dosya
+deterministik bozulur, Canton import'u GERÇEK hatayla reddeder
+(`PROTO_DESERIALIZATION_FAILURE`), araç güvenli durur, hedef temizliği kanıtlanır,
+snapshot restore edilir ve `resume` replication'ı tamamlar.
+
+```bash
+bash cli/scripts/live-fault-drill.sh
+```
+
+**Beklenen akış:** `drill PASS` → `CRO_CLEAN_OK` (failed import sonrası target ACS boş)
+→ `rollback done` → `completed` → `CRO_ASSERT_OK`.
+**Kanıt:** `localnet/out/fault-a8-diagnosis.json` (gerçek Canton hata satırları),
+`localnet/out/fault-drill-proof.txt`, run-log A8 eki (rollback runbook'u dahil).
+Not: `partial-acs-import` gerçek ledger'da deterministik üretilemez — stub-only (v1).
+
 ### D) CI
 
 Push/PR → `.github/workflows/localnet-drill.yml`:

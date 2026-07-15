@@ -1,0 +1,23 @@
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8
+CRO_DAEMON_READY
+2026-07-16 01:32:14,061 [slick-participant2-4-1] WARN  slick.basic.BasicBackend.action - Exception while closing session
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.message.DbException.get(DbException.java:188)
+	at org.h2.jdbc.JdbcConnection.checkClosed(JdbcConnection.java:1425)
+	at org.h2.jdbc.JdbcConnection.clearWarnings(JdbcConnection.java:660)
+	at com.zaxxer.hikari.pool.ProxyConnection.close(ProxyConnection.java:258)
+	at slick.jdbc.JdbcBackend$BaseSession.close(JdbcBackend.scala:531)
+	at slick.basic.BasicBackend$BasicDatabaseDef.releaseSession(BasicBackend.scala:305)
+	at slick.basic.BasicBackend$BasicDatabaseDef.releaseSession$(BasicBackend.scala:298)
+	at slick.jdbc.JdbcBackend$JdbcDatabaseDef.releaseSession(JdbcBackend.scala:36)
+	at slick.basic.BasicBackend$BasicDatabaseDef.liftedTree1$1(BasicBackend.scala:324)
+	at slick.basic.BasicBackend$BasicDatabaseDef.$anonfun$runSynchronousDatabaseAction$2(BasicBackend.scala:323)
+	at slick.basic.BasicBackend$BasicDatabaseDef.$anonfun$runSynchronousDatabaseAction$2$adapted(BasicBackend.scala:318)
+	at slick.util.AsyncExecutor$PrioritizedRunnable$$anon$6.run(AsyncExecutor.scala:330)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)

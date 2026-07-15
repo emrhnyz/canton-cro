@@ -22,8 +22,8 @@ export const PreflightFactsSchema = z.object({
   willSetOnboardingFlag: z.boolean(),
   /** Step 9: backup plan ready before import (pg_dump or documented equivalent) */
   backupPlanReady: z.boolean(),
-  /** storage hint; memory => backup warning */
-  storageKind: z.enum(["memory", "postgres", "unknown"]).default("unknown"),
+  /** storage hint; memory => backup warning (h2 = file-based localnet persistence) */
+  storageKind: z.enum(["memory", "h2", "postgres", "unknown"]).default("unknown"),
   /**
    * Step 0 offline path preference: party already has contracts.
    * Baseline marks contract assert as "bilinmiyor" — warn only if explicitly false.

@@ -13,6 +13,19 @@ export const RunConfigSchema = z.object({
   runOptionalSteps: z.boolean().default(true),
   /** Fault injection at import_acs (drill). Default none. */
   faultInjection: z.enum(FAULT_INJECTIONS).default("none"),
+  /** Step executor: stub (simulated, default) or canton (real remote console). */
+  runner: z.enum(["stub", "canton"]).optional(),
+  /** Canton adapter settings (used when runner = canton). */
+  canton: z
+    .object({
+      /** Path to canton executable (bin/canton or bin\\canton.bat). */
+      bin: z.string().min(1),
+      /** Remote console config, e.g. localnet/remote-topology.conf. */
+      remoteConf: z.string().min(1),
+      /** DAR to upload/vet on target (vet_packages). */
+      darPath: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type RunConfig = z.infer<typeof RunConfigSchema>;

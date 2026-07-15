@@ -1,0 +1,30 @@
+{"ts":"2026-07-15T22:30:34.864Z","type":"preflight","ok":true,"errors":[]}
+{"ts":"2026-07-15T22:30:34.865Z","type":"apply_start","cursor":0}
+{"ts":"2026-07-15T22:30:34.865Z","type":"step_start","step":"vet_packages"}
+{"ts":"2026-07-15T22:30:44.298Z","type":"step_done","step":"vet_packages","message":"real: vet_packages ok (mainPackageId=4dffebf4008e845e37f602fa2d54fd596a8b605af564239fc62948c39fdb79e2)"}
+{"ts":"2026-07-15T22:30:44.300Z","type":"step_start","step":"data_retention"}
+{"ts":"2026-07-15T22:30:47.859Z","type":"step_done","step":"data_retention","message":"real: data_retention ok (pruningCleared=true)"}
+{"ts":"2026-07-15T22:30:47.859Z","type":"step_start","step":"target_authorize"}
+{"ts":"2026-07-15T22:30:58.031Z","type":"step_done","step":"target_authorize","message":"real: target_authorize ok (targetAuthorized=true)"}
+{"ts":"2026-07-15T22:30:58.032Z","type":"step_start","step":"disconnect_all"}
+{"ts":"2026-07-15T22:31:01.588Z","type":"step_done","step":"disconnect_all","message":"real: disconnect_all ok (targetDisconnected=true)"}
+{"ts":"2026-07-15T22:31:01.588Z","type":"step_start","step":"disable_auto_reconnect"}
+{"ts":"2026-07-15T22:31:05.249Z","type":"step_done","step":"disable_auto_reconnect","message":"real: disable_auto_reconnect ok (manualConnect=true)"}
+{"ts":"2026-07-15T22:31:05.249Z","type":"step_start","step":"source_authorize"}
+{"ts":"2026-07-15T22:31:09.065Z","type":"step_done","step":"source_authorize","message":"real: source_authorize ok (beforeActivationOffset=28)"}
+{"ts":"2026-07-15T22:31:09.066Z","type":"step_start","step":"export_acs"}
+{"ts":"2026-07-15T22:31:14.123Z","type":"step_done","step":"export_acs","message":"real: export_acs wrote 611 bytes (/Users/erenyegit/dev/canton-cro/cli/runs/live-a6/acs/party_replication.acs.gz)"}
+{"ts":"2026-07-15T22:31:14.123Z","type":"step_start","step":"reenable_pruning"}
+{"ts":"2026-07-15T22:31:17.595Z","type":"step_done","step":"reenable_pruning","message":"real: reenable_pruning ok (pruningRestored=noop)"}
+{"ts":"2026-07-15T22:31:17.595Z","type":"step_start","step":"backup_target"}
+{"ts":"2026-07-15T22:31:17.596Z","type":"step_skipped","step":"backup_target","message":"h2 storage: backup step is a documented no-op in v1 (baseline step 9 note) — real backup + restore-from-backup lands with the A8 drill"}
+{"ts":"2026-07-15T22:31:17.596Z","type":"step_start","step":"import_acs"}
+{"ts":"2026-07-15T22:31:21.582Z","type":"step_done","step":"import_acs","message":"real: import_acs ok (acsImported=true)"}
+{"ts":"2026-07-15T22:31:21.583Z","type":"step_start","step":"reconnect"}
+{"ts":"2026-07-15T22:31:25.961Z","type":"step_done","step":"reconnect","message":"real: reconnect ok (targetLedgerEnd=24, reconnected=true)"}
+{"ts":"2026-07-15T22:31:25.962Z","type":"step_start","step":"reenable_auto_reconnect"}
+{"ts":"2026-07-15T22:31:29.683Z","type":"step_done","step":"reenable_auto_reconnect","message":"real: reenable_auto_reconnect ok (manualConnect=false)"}
+{"ts":"2026-07-15T22:31:29.684Z","type":"step_start","step":"clear_onboarding_flag"}
+{"ts":"2026-07-15T22:32:10.016Z","type":"step_done","step":"clear_onboarding_flag","message":"real: clear_onboarding_flag ok (onboardingFlagCleared=true)"}
+{"ts":"2026-07-15T22:32:10.017Z","type":"completed"}
+{"ts":"2026-07-15T22:32:10.260Z","type":"noop","mode":"apply","reason":"already complete"}

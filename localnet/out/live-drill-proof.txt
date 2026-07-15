@@ -1,0 +1,103 @@
+Canton OSS not found — downloading 3.5.8...
+waiting for daemon (CRO_DAEMON_READY)...
+daemon ready.
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8 "-Dcro.dar=/Users/erenyegit/dev/canton-cro/vendor/canton-open-source-3.5.8/dars/CantonExamples.dar" "-Dcro.partyHint=alice-14598"
+CRO_VAR partyId=alice-14598::12205b2114ff90a75111203cd032f19cd11b3c12a0e704edbfa481c244b9078ba7f6
+CRO_VAR sourceAcsCount=1
+CRO_SETUP_OK
+party: alice-14598::12205b2114ff90a75111203cd032f19cd11b3c12a0e704edbfa481c244b9078ba7f6
+Initialized run 'live-a6'
+  config: runs/live-a6/config.json
+  facts:  runs/live-a6/facts.json
+  state:  runs/live-a6/state.json
+plan for run: live-a6  (read-only; no state mutation)
+config: participant1 → participant2 @ da
+party:  alice-14598::12205b2114ff90a75111203cd032f19cd11b3c12a0e704edbfa481c244b9078ba7f6
+run status: idle
+
+ 1. [RUN ] vet_packages — Target: package vetting (pending; status=pending)
+ 2. [RUN ] data_retention — Source: data retention (clear pruning schedule) (pending; status=pending)
+ 3. [RUN ] target_authorize — Target: hosting authorization (onboarding) (pending; status=pending)
+ 4. [RUN ] disconnect_all — Target: disconnect all synchronizers (pending; status=pending)
+ 5. [RUN ] disable_auto_reconnect — Target: disable auto-reconnect (pending; status=pending)
+ 6. [RUN ] source_authorize — Source: party authorization + offset (pending; status=pending)
+ 7. [RUN ] export_acs — Source: ACS export (pending; status=pending)
+ 8. [RUN ] reenable_pruning (opt) — Source: re-enable automatic pruning (pending; status=pending)
+ 9. [RUN ] backup_target — Target: backup before ACS import (pending; status=pending)
+10. [RUN ] import_acs — Target: ACS import (pending; status=pending)
+11. [RUN ] reconnect — Target: reconnect to synchronizer (pending; status=pending)
+12. [RUN ] reenable_auto_reconnect (opt) — Target: re-enable auto-reconnect (pending; status=pending)
+13. [RUN ] clear_onboarding_flag — Target: clear onboarding flag (pending; status=pending)
+
+summary: 13 step(s) would run on apply/resume path
+preflight: PASS
+
+[OK ] config_source_neq_target
+      Source and target participant aliases must differ
+      baseline: Adım 0 / senaryo
+      participant1 ≠ participant2
+[OK ] config_party_id
+      partyId must be set (party hosted on source)
+      baseline: Adım 0
+      partyId=alice-14598::12205b2114ff90a75111203cd032f19cd11b3c12a0e704edbfa481c244b9078ba7f6
+[OK ] participants_reachable
+      Participants and synchronizer must be reachable
+      baseline: Adım 0 pre: iki participant + synchronizer ayakta
+      participantsReachable=true
+[OK ] health_ping_ok
+      Cross-participant health.ping must succeed
+      baseline: Adım 0 pre: health.ping
+      healthPingOk=true
+[OK ] party_hosted_on_source
+      Party must be hosted on the source participant
+      baseline: Adım 0 pre: party source üzerinde host
+      partyHostedOnSource=true
+[OK ] source_has_packages
+      Source participant must have packages for the party
+      baseline: Adım 1 pre: source’ta party DAR(ları) yüklü
+      sourceHasPackages=true
+[OK ] target_connected_before_isolation
+      Target must still be connected to synchronizer before isolation steps
+      baseline: Adım 1/3 pre: target synchronizer’a bağlı (isolation öncesi)
+      targetConnectedToSync=true
+[OK ] onboarding_flag_required
+      Operator must confirm onboarding flag will be set
+      baseline: Adım 3/6 warning: requiresPartyToBeOnboarded = true
+      willSetOnboardingFlag=true
+[OK ] backup_before_import
+      Backup plan must be ready before ACS import
+      baseline: Adım 9: Target backup zorunlu (ACS import öncesi)
+      backupPlanReady=true
+[WRN] memory_storage_backup_note
+      Memory storage has no pg_dump path; backup procedure is operator-defined
+      baseline: Adım 9 LocalNet notu: memory → pg_dump yok
+      storageKind=h2
+[WRN] party_has_contracts_offline_path
+      Offline path expects party already used in Daml txs when known
+      baseline: Adım 0: offline yol için contracts (assert bilinmiyor → warn)
+      partyHasContracts=true
+[INF] acs_mismatch_expected_info
+      ACS commitment mismatches during onboarding are expected
+      baseline: Beklenen gürültü: onboarding ACS commitment mismatch
+      Do not treat expected ACS_COMMITMENT_MISMATCH during onboarding as import failure
+  ✓ vet_packages: real: vet_packages ok (mainPackageId=4dffebf4008e845e37f602fa2d54fd596a8b605af564239fc62948c39fdb79e2)
+  ✓ data_retention: real: data_retention ok (pruningCleared=true)
+  ✓ target_authorize: real: target_authorize ok (targetAuthorized=true)
+  ✓ disconnect_all: real: disconnect_all ok (targetDisconnected=true)
+  ✓ disable_auto_reconnect: real: disable_auto_reconnect ok (manualConnect=true)
+  ✓ source_authorize: real: source_authorize ok (beforeActivationOffset=28)
+  ✓ export_acs: real: export_acs wrote 611 bytes (/Users/erenyegit/dev/canton-cro/cli/runs/live-a6/acs/party_replication.acs.gz)
+  ✓ reenable_pruning: real: reenable_pruning ok (pruningRestored=noop)
+  ~ backup_target: h2 storage: backup step is a documented no-op in v1 (baseline step 9 note) — real backup + restore-from-backup lands with the A8 drill
+  ✓ import_acs: real: import_acs ok (acsImported=true)
+  ✓ reconnect: real: reconnect ok (targetLedgerEnd=24, reconnected=true)
+  ✓ reenable_auto_reconnect: real: reenable_auto_reconnect ok (manualConnect=false)
+  ✓ clear_onboarding_flag: real: clear_onboarding_flag ok (onboardingFlagCleared=true)
+run live-a6: completed
+run live-a6: already complete (idempotent no-op)
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8 "-Dcro.party=alice-14598::12205b2114ff90a75111203cd032f19cd11b3c12a0e704edbfa481c244b9078ba7f6"
+CRO_VAR targetAcsCount=1
+CRO_ASSERT_OK
+
+live-drill OK — real 13-step offline party replication completed (run: live-a6)
+evidence: cli/runs/live-a6/{state.json,events.jsonl,logs/,acs/}, /Users/erenyegit/dev/canton-cro/localnet/out/live-*.out

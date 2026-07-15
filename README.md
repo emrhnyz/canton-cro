@@ -8,8 +8,10 @@ Open-source CLI for **party/participant recovery orchestration** on Canton (offl
 |-------|------|
 | Proje rehberi (aşamalar + vibe-coding promptlar) | [`notes/canton-recovery-orchestration-rehber.html`](notes/canton-recovery-orchestration-rehber.html) |
 | Manual baseline (13 steps) | [`docs/manual-baseline.md`](docs/manual-baseline.md) |
-| Local 2-participant env | [`localnet/`](localnet/) |
+| **LIVE run log (13/13 real steps, GO)** | [`docs/manual-baseline-run-log.md`](docs/manual-baseline-run-log.md) |
+| Local 2-participant env (H2 persistent) | [`localnet/`](localnet/) — `cro-topology.conf` |
 | Happy-path CLI + fault drill | [`cli/`](cli/) |
+| **Real Canton adapter (A6)** | [`cli/src/runner/canton.ts`](cli/src/runner/canton.ts) + [`cli/scripts/live-drill.sh`](cli/scripts/live-drill.sh) |
 | CI LocalNet / fault drill | [`.github/workflows/localnet-drill.yml`](.github/workflows/localnet-drill.yml) |
 
 ## Quick start (CLI)
@@ -82,6 +84,21 @@ $env:JAVA_TOOL_OPTIONS = "-Duser.language=en -Duser.country=US"
 ```
 
 **Kanıt:** logda `Observed archival of ping contract` + `localnet/out/ping-proof.txt` (veya CI artifact `localnet-ping-proof`).
+
+### C2) LIVE drill — gerçek Canton, 13 gerçek adım (A6 kanıtı)
+
+Stub yok: daemon (H2 persistence) + her adım gerçek remote console. Uçtan uca
+offline party replication + idempotent ikinci apply + target'ta ACS doğrulaması.
+
+```bash
+# macOS/Linux (JDK 17+; Canton OSS otomatik iner):
+bash cli/scripts/live-drill.sh
+```
+
+**Kanıt:** `docs/manual-baseline-run-log.md` (adım adım gerçek çıktılar),
+`localnet/out/live-drill-proof.txt`, `localnet/out/live-a6-{state.json,events.jsonl}`.
+Not: memory storage ACS import'u desteklemiyor (`IMPORT_ACS_ERROR`) — bu yüzden
+`localnet/cro-topology.conf` H2 file storage kullanır.
 
 ### D) CI
 

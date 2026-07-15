@@ -8,6 +8,7 @@ import {
   type RunState,
 } from "./state.js";
 import { runStubStep } from "./runner/stub.js";
+import { makeCantonRunner } from "./runner/canton.js";
 import { loadFacts } from "./facts.js";
 import { evaluatePreflight, formatPreflightReport } from "./preflight.js";
 import { AcsImportFaultError, formatDiagnosis } from "./fault.js";
@@ -63,13 +64,15 @@ export async function runMachine(
 ): Promise<MachineResult> {
   const opts: RunMachineOptions =
     typeof cwdOrOpts === "string"
-      ? { cwd: cwdOrOpts, execute: executeCompat ?? runStubStep }
-      : { execute: runStubStep, requirePreflight: true, ...cwdOrOpts };
+      ? { cwd: cwdOrOpts, execute: executeCompat }
+      : { requirePreflight: true, ...cwdOrOpts };
   const cwd = opts.cwd ?? process.cwd();
-  const execute = opts.execute ?? runStubStep;
   const requirePreflight = opts.requirePreflight ?? mode === "apply";
 
   const state = loadState(runId, cwd);
+  // Runner selection: explicit injection (tests) > config.runner > stub default.
+  const execute =
+    opts.execute ?? (state.config.runner === "canton" ? makeCantonRunner(cwd) : runStubStep);
 
   if (allTerminal(state)) {
     state.status = "completed";
@@ -166,11 +169,19 @@ export async function runMachine(
         stepId: step.id,
         config: state.config,
       });
-      step.status = "done";
+      step.status = result.skipped ? "skipped" : "done";
       step.updatedAt = new Date().toISOString();
       delete step.error;
-      appendEvent(runId, { type: "step_done", step: step.id, message: result.message }, cwd);
-      console.log(`  ✓ ${step.id}: ${result.message}`);
+      appendEvent(
+        runId,
+        {
+          type: result.skipped ? "step_skipped" : "step_done",
+          step: step.id,
+          message: result.message,
+        },
+        cwd,
+      );
+      console.log(`  ${result.skipped ? "~" : "✓"} ${step.id}: ${result.message}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       step.status = "failed";

@@ -30,6 +30,11 @@ program
   .option("--sync-alias <alias>", "Synchronizer alias", "da")
   .option("--party-id <id>", "Party id", "Alice::example")
   .option("--skip-optional", "Skip optional pruning/auto-reconnect re-enable steps", false)
+  .option("--runner <kind>", "Step executor: stub | canton (env: CRO_RUNNER)")
+  .option("--canton-bin <path>", "Canton executable (env: CANTON_BIN)")
+  .option("--remote-conf <path>", "Remote console config (env: CRO_REMOTE_CONF)")
+  .option("--dar-path <path>", "DAR for vet_packages (env: CRO_DAR_PATH)")
+  .option("--storage-kind <kind>", "participant storage: memory | h2 | postgres | unknown")
   .action((opts: {
     run: string;
     source: string;
@@ -37,7 +42,26 @@ program
     syncAlias: string;
     partyId: string;
     skipOptional: boolean;
+    runner?: string;
+    cantonBin?: string;
+    remoteConf?: string;
+    darPath?: string;
+    storageKind?: string;
   }) => {
+    const runner = (opts.runner ?? process.env.CRO_RUNNER) as
+      | RunConfig["runner"]
+      | undefined;
+    if (runner && runner !== "stub" && runner !== "canton") {
+      throw new Error("--runner must be stub or canton");
+    }
+    const cantonBin = opts.cantonBin ?? process.env.CANTON_BIN;
+    const remoteConf = opts.remoteConf ?? process.env.CRO_REMOTE_CONF;
+    const darPath = opts.darPath ?? process.env.CRO_DAR_PATH;
+    if (runner === "canton" && (!cantonBin || !remoteConf)) {
+      throw new Error(
+        "--runner canton needs --canton-bin and --remote-conf (or CANTON_BIN / CRO_REMOTE_CONF env)",
+      );
+    }
     const config: RunConfig = {
       source: opts.source,
       target: opts.target,
@@ -45,9 +69,20 @@ program
       partyId: opts.partyId,
       runOptionalSteps: !opts.skipOptional,
       faultInjection: "none",
+      ...(runner ? { runner } : {}),
+      ...(runner === "canton" && cantonBin && remoteConf
+        ? { canton: { bin: cantonBin, remoteConf, ...(darPath ? { darPath } : {}) } }
+        : {}),
     };
     writeConfig(opts.run, config);
-    writeFacts(opts.run, defaultStubFacts());
+    const facts = defaultStubFacts();
+    if (opts.storageKind) {
+      if (!["memory", "h2", "postgres", "unknown"].includes(opts.storageKind)) {
+        throw new Error("--storage-kind must be memory | h2 | postgres | unknown");
+      }
+      facts.storageKind = opts.storageKind as typeof facts.storageKind;
+    }
+    writeFacts(opts.run, facts);
     const state = createInitialState(opts.run, config);
     saveState(state);
     console.log(`Initialized run '${opts.run}'`);

@@ -14,6 +14,8 @@ export interface StepContext {
 
 export interface StepResult {
   ok: true;
+  /** When true, the machine marks the step skipped (documented no-op). */
+  skipped?: boolean;
   message: string;
 }
 

@@ -277,10 +277,10 @@ Aşağısı docs’taki net sinyaller + bilinçli boşluklar:
 
 | Alan | Değer |
 |------|--------|
-| Elle uçtan uca koşuldu mu? | **Hayır** (bu dosya prosedür extract’i) |
-| Ortam | Canton OSS 3.5.8, `01-simple-topology`, memory storage |
-| Splice LocalNet | BLOCKED (Docker yok) — bkz. `localnet/ISSUES.md` |
-| Sonraki iş | Bu 13 adımı console’da bir kez koş; her satırın yanına gerçek çıktı / süre / hata yapıştır; assert boşluklarını doldur |
+| Uçtan uca koşuldu mu? | **EVET — 2026-07-16, gerçek Canton 3.5.8** (bkz. [manual-baseline-run-log.md](manual-baseline-run-log.md)) |
+| Ortam | Canton OSS 3.5.8, `localnet/cro-topology.conf` (**H2 storage** — memory ACS import’u desteklemiyor, run-log’daki kritik keşif) |
+| Splice LocalNet | BLOCKED (Docker yok) — bkz. `localnet/ISSUES.md`; PoC için gerekmedi |
+| Sonuç | 13/13 adım geçti; assert boşlukları run-log’da kapandı; karar **GO** |
 
 ---
 

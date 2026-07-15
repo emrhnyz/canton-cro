@@ -31,3 +31,17 @@
 
 - Sistemde Java 8 vardı (yetersiz)
 - `winget install Microsoft.OpenJDK.17` ile 17.0.19 kuruldu
+
+## 5) macOS iCloud Documents — Kırıldı, taşındı
+
+- **Belirti:** `node`/`tsx` başlarken `Error: ETIMEDOUT: connection timed out, read` (errno -60, `readFileSync`)
+- **Neden:** Repo `~/Documents` altındaydı; iCloud Drive "Desktop & Documents" senkronu `node_modules` dosyalarını buluta offload ediyor (dataless), okuma anında geri indiremeyince yerel `read` timeout'a düşüyor
+- **Fix:** Repo iCloud kapsamı dışına taşındı (`~/dev/canton-cro`). Windows TR-locale mayınının (madde 2) macOS muadili
+- **Etki:** Kod değişikliği yok; çalışma dizini kuralı: repo'yu iCloud-senkronlu klasörde tutma
+
+## 6) Memory storage ACS import'u reddediyor — cro-topology.conf ile çözüldü
+
+- **Belirti:** `IMPORT_ACS_ERROR ... is in memory which is not supported by repair. Use db persistence.`
+- **Neden:** Canton, ACS import'u (repair sınıfı işlem) memory storage'da desteklemiyor — `01-simple-topology` party replication için yetersiz
+- **Fix:** `localnet/cro-topology.conf` — participant'lar H2 file storage (`config/storage/h2.conf` mixin + `examples/07-repair` kalıbı), portlar simple-topology ile aynı
+- **Detay:** `docs/manual-baseline-run-log.md`

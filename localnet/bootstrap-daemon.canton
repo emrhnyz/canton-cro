@@ -1,0 +1,21 @@
+// Daemon bootstrap for CRO live drills.
+// Starts nodes, bootstraps the synchronizer, connects both participants.
+// The daemon then stays up; all recovery steps run via remote console
+// (localnet/remote-topology.conf).
+nodes.local.start()
+
+bootstrap.synchronizer_local()
+
+participant1.synchronizers.connect_local(sequencer1, alias = "da")
+
+val daPort = Option(System.getProperty("canton-examples.da-port")).getOrElse("5001")
+participant2.synchronizers.connect("da", s"http://localhost:$daPort")
+
+utils.retry_until_true {
+  participant2.synchronizers.active("da")
+}
+
+// Sanity: both participants see each other before we call the env ready.
+participant2.health.ping(participant1)
+
+println("CRO_DAEMON_READY")

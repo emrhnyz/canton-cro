@@ -19,3 +19,7 @@ cli/runs/
 Thumbs.db
 .idea/
 .vscode/
+
+# Live-drill H2 workdir + transient CI proof
+localnet/out/h2/
+localnet/out/ci-ping-proof.txt

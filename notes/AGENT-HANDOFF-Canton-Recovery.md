@@ -3,7 +3,7 @@
 **Tarih:** 2026-07-16
 **Amaç:** Bu dosyayı yeni bir agent'a vererek projeyi **aynı bağlam seviyesinde** devam ettirmek.
 **Dil:** Kullanıcı Türkçe konuşuyor; teknik terimler İngilizce kalabilir.
-**Repo:** https://github.com/emrhnyz/canton-cro (public)
+**Repo:** https://github.com/canton-cro/canton-cro (public, org: `canton-cro`)
 **Rehber (aşamalar + prompt setleri):** `notes/canton-recovery-orchestration-rehber.html` — durum banner'ı ve promptlar 2026-07-16 itibarıyla güncel.
 
 ---
@@ -39,7 +39,7 @@ Canton Network Development Fund için başvurulacak açık kaynak **CLI / ops ar
 | Champion süreci | ⬜ Kullanıcı ayrıca yürütüyor (PR → needs-champion) | — |
 
 **Sıradaki iş sırası:** (insan) videoyu storyboard'a göre çek + linki README'ye koy || (agent) A5 grant metni (AI-slop kurallarıyla, outline → onay → full) → PR → needs-champion.
-**Ayrıca:** arkadaş (emrhnyz) Windows uyumluluğunu doğrulayıp düzeltti (canton.bat resolve, cygpath native path, Scala path escape — `localnet/ISSUES.md` #7-9) ve Apache-2.0 LICENSE + NOTICE ekledi.
+**Ayrıca:** Windows uyumluluğu doğrulandı (canton.bat resolve, cygpath native path, Scala path escape — `localnet/ISSUES.md` #7-9) ve Apache-2.0 LICENSE + NOTICE eklendi. Repo org'a taşındı: `canton-cro/canton-cro`.
 
 ---
 
@@ -107,7 +107,8 @@ canton-cro/
 ## 6) Çalışma düzeni (iki makine + kimlikler)
 
 - **Kullanıcı (mac):** repo `/Users/erenyegit/dev/canton-cro` (iCloud dışı — taşıma sebebi keşif #5b). Git kimliği repo-local **cleron43** (noreply email); gh CLI'da cleron43 aktif hesap, erenyegit yedekte (`gh auth switch`). OpenJDK 17 Homebrew'da: `export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"`.
-- **Arkadaş (Windows, emrhnyz):** repo sahibi; TR locale fix'i şart (ISSUES.md #2). Windows'ta live-drill henüz doğrulanmadı (opsiyonel iş #5, rehber bölüm 6).
+- **Arkadaş (Windows, emrhnyz):** contributor; TR locale fix'i şart (ISSUES.md #2). Windows live-drill doğrulandı (ISSUES #7-9).
+- **Canonical remote:** `https://github.com/canton-cro/canton-cro.git` (eski `emrhnyz/canton-cro` mirror/kişisel fork olabilir; push org'a).
 - **Commit kuralı:** commit mesajlarına Co-Authored-By / AI imza satırı EKLEME.
 - **Akış:** doğrudan main'e push (PR akışı bilinçli olarak kullanılmıyor — kullanıcı kararı).
 - Canton OSS 3.5.8 `vendor/` altında (gitignore'lu; script'ler yoksa otomatik indirir).

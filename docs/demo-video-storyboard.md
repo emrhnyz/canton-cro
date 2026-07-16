@@ -84,7 +84,7 @@ sessiz + caption yeterli. Konuşacaksan kısa İngilizce cümleler kullan.
 - Caption üç satır, sırayla:
   - "No keys. No wallet. No dashboard. Recovery orchestration only."
   - "Apache-2.0. Evidence for every claim in the repo."
-  - "github.com/emrhnyz/canton-cro"
+  - "github.com/canton-cro/canton-cro"
 
 ## Kurgu notları
 

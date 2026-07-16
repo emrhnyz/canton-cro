@@ -4,6 +4,14 @@
   "description": "Canton Recovery Orchestration CLI (offline party replication drills)",
   "private": true,
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/canton-cro/canton-cro.git"
+  },
+  "homepage": "https://github.com/canton-cro/canton-cro",
+  "bugs": {
+    "url": "https://github.com/canton-cro/canton-cro/issues"
+  },
   "type": "module",
   "bin": {
     "cro": "./dist/index.js"

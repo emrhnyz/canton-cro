@@ -5,7 +5,7 @@
 **Created:** 2026-07-16
 **Label:** node-deployment-operations
 
-**[Champion](https://github.com/canton-foundation/canton-dev-fund/blob/main/sig-directory.md):** open to any Tech & Ops Committee member organization (e.g., Digital Asset, IntellectEU, Cumberland); to be confirmed during review
+**Champion:** open to any Tech & Ops Committee member organization (e.g., Digital Asset, IntellectEU, Cumberland); to be confirmed during review
 
 ---
 

@@ -1,5 +1,6 @@
 import { STEPS, type StepDef } from "./steps.js";
 import type { RunState } from "./state.js";
+import { kv, rule, section, stepLine } from "./ui.js";
 
 export interface PlanItem {
   index: number;
@@ -45,25 +46,28 @@ export function buildPlan(state: RunState): PlanItem[] {
 
 export function formatPlan(state: RunState, items: PlanItem[]): string {
   const lines = [
-    `plan for run: ${state.runId}  (read-only; no state mutation)`,
-    `config: ${state.config.source} → ${state.config.target} @ ${state.config.syncAlias}`,
-    `party:  ${state.config.partyId}`,
-    `run status: ${state.status}`,
+    section("plan (read-only)"),
+    kv("run", state.runId),
+    kv("path", `${state.config.source} -> ${state.config.target} @ ${state.config.syncAlias}`),
+    kv("party", state.config.partyId),
+    kv("status", state.status),
+    kv("runner", state.config.runner ?? "stub"),
     "",
   ];
 
   if (state.status === "failed") {
     lines.push(
-      "NOTE: run is failed — cro apply is blocked until cro resume (plan still shows remaining work).",
+      "  NOTE: run is failed - cro apply is blocked until cro resume",
+      "        (plan still shows remaining work).",
       "",
     );
   }
 
+  lines.push(rule());
   for (const it of items) {
-    const opt = it.optional ? " (opt)" : "";
     const tag =
       it.action === "run"
-        ? "RUN "
+        ? "RUN"
         : it.action === "skip_done"
           ? "SKIP"
           : it.action === "skip_optional"
@@ -71,20 +75,19 @@ export function formatPlan(state: RunState, items: PlanItem[]): string {
             : "BLOCK";
     const why =
       it.action === "skip_done"
-        ? "already done"
+        ? `done; status=${it.currentStatus}`
         : it.action === "skip_optional"
           ? "optional disabled"
           : it.action === "skip_failed_blocked"
-            ? "failed — use resume"
-            : "pending";
-    lines.push(
-      `${String(it.index + 1).padStart(2)}. [${tag}] ${it.id}${opt} — ${it.title} (${why}; status=${it.currentStatus})`,
-    );
+            ? "failed - use resume"
+            : `pending; status=${it.currentStatus}`;
+    const title = it.optional ? `${it.title} (opt)` : it.title;
+    lines.push(stepLine(it.index + 1, tag, it.id, title, why));
   }
 
   const toRun = items.filter((i) => i.action === "run").length;
-  lines.push("");
-  lines.push(`summary: ${toRun} step(s) would run on apply/resume path`);
+  lines.push(rule());
+  lines.push(`  Summary: ${toRun} step(s) would run on apply/resume`);
   return lines.join("\n");
 }
 

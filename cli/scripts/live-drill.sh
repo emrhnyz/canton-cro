@@ -60,17 +60,22 @@ echo "waiting for daemon (CRO_DAEMON_READY)..."
 for _ in $(seq 1 120); do
   grep -q "CRO_DAEMON_READY" "$DAEMON_LOG" 2>/dev/null && break
   if ! kill -0 "$DAEMON_PID" 2>/dev/null; then
-    echo "live-drill FAIL: daemon died during bootstrap — see $DAEMON_LOG"
+    echo "FAIL: daemon died during bootstrap - see $DAEMON_LOG"
     exit 1
   fi
   sleep 2
 done
 grep -q "CRO_DAEMON_READY" "$DAEMON_LOG" || {
-  echo "live-drill FAIL: daemon not ready in time — see $DAEMON_LOG"
+  echo "FAIL: daemon not ready in time - see $DAEMON_LOG"
   exit 1
 }
-echo "daemon ready."
-
+echo "Daemon ready."
+echo ""
+echo "========================================================================"
+echo "  LIVE DRILL  |  13-step offline party replication (real Canton)"
+echo "  run: $RUN_ID"
+echo "========================================================================"
+echo ""
 # --- 2) Step 0: party + contract on source ------------------------------------
 PARTY_HINT="alice-$$"
 SETUP_OUT="$OUT/live-setup.out"
@@ -80,10 +85,10 @@ CANTON_BIN_NATIVE="$(native_path "$CANTON_BIN")"
 JAVA_TOOL_OPTIONS="$LOCALE_OPTS \"-Dcro.dar=$DAR_NATIVE\" \"-Dcro.partyHint=$PARTY_HINT\"" \
   "$CANTON_BIN" run "$ROOT/localnet/scripts/step0-setup.sc" \
   -c "$REMOTE_CONF" --log-level-stdout=WARN | tee "$SETUP_OUT"
-grep -q "CRO_SETUP_OK" "$SETUP_OUT" || { echo "live-drill FAIL: setup"; exit 1; }
+grep -q "CRO_SETUP_OK" "$SETUP_OUT" || { echo "FAIL: step0 setup"; exit 1; }
 PARTY="$(grep -oE '^CRO_VAR partyId=.*$' "$SETUP_OUT" | head -1 | cut -d= -f2)"
-echo "party: $PARTY"
-
+echo "Party: $PARTY"
+echo ""
 # --- 3) CRO init + plan + preflight + apply (real runner) ----------------------
 cd "$ROOT/cli"
 rm -rf "runs/$RUN_ID"  # fresh run: no stale state/vars from earlier drills
@@ -105,7 +110,7 @@ cro apply --run "$RUN_ID"
 SECOND="$(cro apply --run "$RUN_ID")"
 echo "$SECOND"
 echo "$SECOND" | grep -q "already complete" || {
-  echo "live-drill FAIL: second apply was not an idempotent no-op"
+  echo "FAIL: second apply was not an idempotent no-op"
   exit 1
 }
 
@@ -114,8 +119,11 @@ ASSERT_OUT="$OUT/live-assert.out"
 JAVA_TOOL_OPTIONS="$LOCALE_OPTS \"-Dcro.party=$PARTY\"" \
   "$CANTON_BIN" run "$ROOT/localnet/scripts/final-assert.sc" \
   -c "$REMOTE_CONF" --log-level-stdout=WARN | tee "$ASSERT_OUT"
-grep -q "CRO_ASSERT_OK" "$ASSERT_OUT" || { echo "live-drill FAIL: final assert"; exit 1; }
+grep -q "CRO_ASSERT_OK" "$ASSERT_OUT" || { echo "FAIL: final assert"; exit 1; }
 
 echo ""
-echo "live-drill OK — real 13-step offline party replication completed (run: $RUN_ID)"
-echo "evidence: cli/runs/$RUN_ID/{state.json,events.jsonl,logs/,acs/}, $OUT/live-*.out"
+echo "========================================================================"
+echo "  LIVE DRILL OK"
+echo "  Real 13-step offline party replication completed (run: $RUN_ID)"
+echo "  Evidence: cli/runs/$RUN_ID/  and  $OUT/live-*.out"
+echo "========================================================================"

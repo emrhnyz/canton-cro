@@ -12,6 +12,7 @@ import { makeCantonRunner } from "./runner/canton.js";
 import { gatherFacts } from "./runner/probe.js";
 import { evaluatePreflight, formatPreflightReport } from "./preflight.js";
 import { AcsImportFaultError, formatDiagnosis } from "./fault.js";
+import { outcomeLine, printBanner, rule, section } from "./ui.js";
 
 export type MachineMode = "apply" | "resume";
 
@@ -59,7 +60,7 @@ export async function runMachine(
   runId: string,
   mode: MachineMode,
   cwdOrOpts: string | RunMachineOptions = process.cwd(),
-  /** @deprecated prefer opts.execute — kept for call-site compat */
+  /** @deprecated prefer opts.execute - kept for call-site compat */
   executeCompat?: typeof runStubStep,
 ): Promise<MachineResult> {
   const opts: RunMachineOptions =
@@ -80,7 +81,7 @@ export async function runMachine(
     appendEvent(runId, { type: "noop", mode, reason: "already complete" }, cwd);
     return {
       exitCode: 0,
-      message: `run ${runId}: already complete (idempotent no-op)`,
+      message: `Run '${runId}': already complete (idempotent no-op)`,
       state,
     };
   }
@@ -89,10 +90,19 @@ export async function runMachine(
   if (mode === "apply" && failedIdx >= 0) {
     return {
       exitCode: 1,
-      message: `run ${runId}: status failed at step ${state.steps[failedIdx]!.id} — use: cro resume --run ${runId}`,
+      message: `Run '${runId}': failed at step '${state.steps[failedIdx]!.id}' - use: cro resume --run ${runId}`,
       state,
     };
   }
+
+  printBanner();
+  console.log(section(`${mode}  run=${runId}`));
+  console.log(
+    `  ${state.config.source} -> ${state.config.target} @ ${state.config.syncAlias}`,
+  );
+  console.log(`  party:  ${state.config.partyId}`);
+  console.log(`  runner: ${state.config.runner ?? "stub"}`);
+  console.log(rule());
 
   if (mode === "apply" && requirePreflight) {
     // canton runner: live-probe the environment; stub: declared facts.json.
@@ -116,10 +126,12 @@ export async function runMachine(
       console.error(formatPreflightReport(report));
       return {
         exitCode: 1,
-        message: `run ${runId}: preflight FAILED — cro apply blocked. Fix runs/${runId}/facts.json or config, then: cro preflight --run ${runId}`,
+        message: `Run '${runId}': preflight FAILED - apply blocked. Fix facts/config, then: cro preflight --run ${runId}`,
         state,
       };
     }
+    console.log("  Preflight: PASS");
+    console.log(rule());
   }
 
   if (mode === "resume") {
@@ -182,14 +194,14 @@ export async function runMachine(
         },
         cwd,
       );
-      console.log(`  ${result.skipped ? "~" : "✓"} ${step.id}: ${result.message}`);
+      console.log(outcomeLine(true, !!result.skipped, step.id, result.message));
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       step.status = "failed";
       step.error = msg;
       step.updatedAt = new Date().toISOString();
       state.status = "failed";
-      // Leave later steps pending (safe stop — do not skip ahead)
+      // Leave later steps pending (safe stop - do not skip ahead)
       for (let j = state.cursor + 1; j < state.steps.length; j++) {
         if (state.steps[j]!.status === "running") {
           state.steps[j]!.status = "pending";
@@ -209,22 +221,22 @@ export async function runMachine(
           },
           cwd,
         );
-        console.error(`  ✗ ${step.id}: ${msg}`);
+        console.error(outcomeLine(false, false, step.id, msg));
         console.error(formatDiagnosis(err.diagnosis));
         saveState(state, cwd);
         return {
           exitCode: 1,
-          message: `run ${runId}: SAFE STOP at ${step.id} (${err.diagnosis.code}) — see runs/${runId}/diagnosis.json — restore backup then cro resume`,
+          message: `Run '${runId}': SAFE STOP at ${step.id} (${err.diagnosis.code}) - see runs/${runId}/diagnosis.json - restore backup then cro resume`,
           state,
         };
       }
 
       appendEvent(runId, { type: "step_failed", step: step.id, error: msg }, cwd);
       saveState(state, cwd);
-      console.error(`  ✗ ${step.id}: ${msg}`);
+      console.error(outcomeLine(false, false, step.id, msg));
       return {
         exitCode: 1,
-        message: `run ${runId}: failed at ${step.id} — cro resume --run ${runId}`,
+        message: `Run '${runId}': failed at ${step.id} - cro resume --run ${runId}`,
         state,
       };
     }
@@ -236,27 +248,30 @@ export async function runMachine(
   state.status = "completed";
   saveState(state, cwd);
   appendEvent(runId, { type: "completed" }, cwd);
+  console.log(rule());
   return {
     exitCode: 0,
-    message: `run ${runId}: completed`,
+    message: `Run '${runId}': completed`,
     state,
   };
 }
 
 export function formatStatus(state: RunState): string {
   const lines = [
-    `run:    ${state.runId}`,
-    `status: ${state.status}`,
-    `cursor: ${state.cursor}`,
-    `party:  ${state.config.partyId}`,
-    `path:   ${state.config.source} → ${state.config.target} @ ${state.config.syncAlias}`,
+    section("status"),
+    `  run:     ${state.runId}`,
+    `  status:  ${state.status}`,
+    `  cursor:  ${state.cursor}`,
+    `  party:   ${state.config.partyId}`,
+    `  path:    ${state.config.source} -> ${state.config.target} @ ${state.config.syncAlias}`,
+    `  runner:  ${state.config.runner ?? "stub"}`,
     "",
-    "steps:",
+    "  Steps:",
   ];
   for (const [i, s] of state.steps.entries()) {
     const mark = i === state.cursor && state.status !== "completed" ? ">" : " ";
     const opt = s.optional ? " (opt)" : "";
-    const err = s.error ? ` — ${s.error}` : "";
+    const err = s.error ? ` - ${s.error}` : "";
     lines.push(`${mark} [${s.status.padEnd(7)}] ${s.id}${opt}${err}`);
   }
   return lines.join("\n");

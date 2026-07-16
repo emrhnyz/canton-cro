@@ -14,13 +14,19 @@ import { defaultStubFacts, writeFacts } from "./facts.js";
 import { gatherFacts } from "./runner/probe.js";
 import { buildPlan, formatPlan } from "./plan.js";
 import { evaluatePreflight, formatPreflightReport } from "./preflight.js";
+import { printBanner, rule, section } from "./ui.js";
 
 const program = new Command();
 
 program
   .name("cro")
-  .description("Canton Recovery Orchestration — happy-path CLI skeleton (stub runner)")
-  .version("0.1.0");
+  .description(
+    "Canton Recovery Orchestration - offline party replication CLI (plan, preflight, apply, resume, drill)",
+  )
+  .version("0.1.0")
+  .hook("preAction", () => {
+    printBanner();
+  });
 
 program
   .command("init")
@@ -86,10 +92,15 @@ program
     writeFacts(opts.run, facts);
     const state = createInitialState(opts.run, config);
     saveState(state);
-    console.log(`Initialized run '${opts.run}'`);
-    console.log(`  config: runs/${opts.run}/config.json`);
-    console.log(`  facts:  runs/${opts.run}/facts.json`);
-    console.log(`  state:  runs/${opts.run}/state.json`);
+    console.log(section("init"));
+    console.log(`  Run '${opts.run}' created`);
+    console.log(`  config:  runs/${opts.run}/config.json`);
+    console.log(`  facts:   runs/${opts.run}/facts.json`);
+    console.log(`  state:   runs/${opts.run}/state.json`);
+    console.log(`  path:    ${config.source} -> ${config.target} @ ${config.syncAlias}`);
+    console.log(`  party:   ${config.partyId}`);
+    console.log(`  runner:  ${config.runner ?? "stub"}`);
+    console.log(rule());
   });
 
 program
@@ -114,10 +125,11 @@ program
   .option("--config <path>", "Override config.json path")
   .action((opts: { run: string; config?: string }) => {
     const cfg = loadConfig(opts.run, process.cwd(), opts.config);
-    // canton runner: live probe (merged + persisted); stub: declared facts.json.
     const facts = gatherFacts(opts.run, cfg);
     if (facts.probe) {
-      console.log(`probe: ${facts.probe.note ?? facts.probe.source} @ ${facts.probe.at}`);
+      console.log(`  Probe: ${facts.probe.note ?? facts.probe.source}`);
+      console.log(`  At:    ${facts.probe.at}`);
+      console.log(rule());
     }
     const report = evaluatePreflight(cfg, facts);
     writePreflightResult(opts.run, {
@@ -148,7 +160,7 @@ program
     state.config = cfg;
     saveState(state);
     const result = await runMachine(opts.run, "apply");
-    console.log(result.message);
+    console.log(`\n  ${result.message}`);
     process.exitCode = result.exitCode;
   });
 
@@ -171,7 +183,6 @@ program
     cfg.faultInjection = opts.fault;
     writeConfig(opts.run, cfg);
     const state = loadState(opts.run);
-    // Reset to idle pending for a clean drill if previously completed
     if (state.status === "completed" || state.status === "failed") {
       const fresh = createInitialState(opts.run, cfg);
       saveState(fresh);
@@ -180,9 +191,9 @@ program
       saveState(state);
     }
     const result = await runMachine(opts.run, "apply");
-    console.log(result.message);
+    console.log(`\n  ${result.message}`);
     if (result.exitCode === 0) {
-      console.error("drill FAIL: expected SAFE STOP at import_acs");
+      console.error("  Drill FAIL: expected SAFE STOP at import_acs");
       process.exitCode = 1;
       return;
     }
@@ -190,18 +201,20 @@ program
     const importStep = st.steps.find((s) => s.id === "import_acs");
     const reconnect = st.steps.find((s) => s.id === "reconnect");
     if (importStep?.status !== "failed" || reconnect?.status !== "pending") {
-      console.error("drill FAIL: expected import_acs=failed and later steps still pending");
+      console.error("  Drill FAIL: expected import_acs=failed and later steps still pending");
       process.exitCode = 1;
       return;
     }
     const { existsSync } = await import("node:fs");
     const { diagnosisPath } = await import("./state.js");
     if (!existsSync(diagnosisPath(opts.run))) {
-      console.error("drill FAIL: diagnosis.json missing");
+      console.error("  Drill FAIL: diagnosis.json missing");
       process.exitCode = 1;
       return;
     }
-    console.log("drill PASS: fault caught, diagnosis written, safe stop (no reconnect)");
+    console.log(section("drill PASS"));
+    console.log("  Fault caught, diagnosis written, safe stop (reconnect still pending).");
+    console.log(rule());
     process.exitCode = 0;
   });
 
@@ -210,15 +223,12 @@ program
   .description("Retry failed step (or continue pending) and finish the run")
   .requiredOption("--run <id>", "Run id")
   .action(async (opts: { run: string }) => {
-    // Reload config.json so recovery edits (e.g. faultInjection back to
-    // "none" after a drill) take effect — state.config is a snapshot from
-    // the failed apply and would otherwise re-inject the fault.
     const cfg = loadConfig(opts.run);
     const state = loadState(opts.run);
     state.config = cfg;
     saveState(state);
     const result = await runMachine(opts.run, "resume");
-    console.log(result.message);
+    console.log(`\n  ${result.message}`);
     process.exitCode = result.exitCode;
   });
 

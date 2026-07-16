@@ -1,5 +1,6 @@
 import type { RunConfig } from "./state.js";
 import type { PreflightFacts } from "./facts.js";
+import { bullet, kv, rule, section } from "./ui.js";
 
 export type CheckSeverity = "error" | "warn" | "info";
 
@@ -22,7 +23,7 @@ export interface PreflightCheck {
 export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   {
     id: "config_source_neq_target",
-    baselineRef: "Adım 0 / senaryo",
+    baselineRef: "Step 0 / scenario",
     severity: "error",
     description: "Source and target participant aliases must differ",
     evaluate: ({ config }) => {
@@ -30,14 +31,14 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
       return {
         pass,
         detail: pass
-          ? `${config.source} ≠ ${config.target}`
+          ? `${config.source} != ${config.target}`
           : `source and target are both '${config.source}'`,
       };
     },
   },
   {
     id: "config_party_id",
-    baselineRef: "Adım 0",
+    baselineRef: "Step 0",
     severity: "error",
     description: "partyId must be set (party hosted on source)",
     evaluate: ({ config }) => {
@@ -50,7 +51,7 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   },
   {
     id: "participants_reachable",
-    baselineRef: "Adım 0 pre: iki participant + synchronizer ayakta",
+    baselineRef: "Step 0 pre: both participants + synchronizer up",
     severity: "error",
     description: "Participants and synchronizer must be reachable",
     evaluate: ({ facts }) => ({
@@ -62,7 +63,7 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   },
   {
     id: "health_ping_ok",
-    baselineRef: "Adım 0 pre: health.ping",
+    baselineRef: "Step 0 pre: health.ping",
     severity: "error",
     description: "Cross-participant health.ping must succeed",
     evaluate: ({ facts }) => ({
@@ -72,7 +73,7 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   },
   {
     id: "party_hosted_on_source",
-    baselineRef: "Adım 0 pre: party source üzerinde host",
+    baselineRef: "Step 0 pre: party hosted on source",
     severity: "error",
     description: "Party must be hosted on the source participant",
     evaluate: ({ facts }) => ({
@@ -84,7 +85,7 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   },
   {
     id: "source_has_packages",
-    baselineRef: "Adım 1 pre: source’ta party DAR(ları) yüklü",
+    baselineRef: "Step 1 pre: party DARs present on source",
     severity: "error",
     description: "Source participant must have packages for the party",
     evaluate: ({ facts }) => ({
@@ -96,7 +97,7 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   },
   {
     id: "target_connected_before_isolation",
-    baselineRef: "Adım 1/3 pre: target synchronizer’a bağlı (isolation öncesi)",
+    baselineRef: "Step 1/3 pre: target connected before isolation",
     severity: "error",
     description: "Target must still be connected to synchronizer before isolation steps",
     evaluate: ({ facts }) => ({
@@ -108,31 +109,31 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
   },
   {
     id: "onboarding_flag_required",
-    baselineRef: "Adım 3/6 warning: requiresPartyToBeOnboarded = true",
+    baselineRef: "Step 3/6: requiresPartyToBeOnboarded = true",
     severity: "error",
     description: "Operator must confirm onboarding flag will be set",
     evaluate: ({ facts }) => ({
       pass: facts.willSetOnboardingFlag,
       detail: facts.willSetOnboardingFlag
         ? "willSetOnboardingFlag=true"
-        : "willSetOnboardingFlag=false — docs require onboarding flag",
+        : "willSetOnboardingFlag=false - docs require onboarding flag",
     }),
   },
   {
     id: "backup_before_import",
-    baselineRef: "Adım 9: Target backup zorunlu (ACS import öncesi)",
+    baselineRef: "Step 9: target backup required before ACS import",
     severity: "error",
     description: "Backup plan must be ready before ACS import",
     evaluate: ({ facts }) => ({
       pass: facts.backupPlanReady,
       detail: facts.backupPlanReady
         ? "backupPlanReady=true"
-        : "backupPlanReady=false — docs: must back up target before import",
+        : "backupPlanReady=false - must back up target before import",
     }),
   },
   {
     id: "memory_storage_backup_note",
-    baselineRef: "Adım 9 LocalNet notu: memory → pg_dump yok",
+    baselineRef: "Step 9 LocalNet note: memory has no pg_dump",
     severity: "warn",
     description: "Memory storage has no pg_dump path; backup procedure is operator-defined",
     evaluate: ({ facts }) => {
@@ -142,20 +143,20 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
       return {
         pass: true,
         detail:
-          "storageKind=memory — baseline: meaningful backup bilinmiyor/doğrulanacak; ensure backupPlanReady reflects your procedure",
+          "storageKind=memory - ensure backupPlanReady reflects your real backup procedure",
       };
     },
   },
   {
     id: "party_has_contracts_offline_path",
-    baselineRef: "Adım 0: offline yol için contracts (assert bilinmiyor → warn)",
+    baselineRef: "Step 0: offline path expects existing contracts",
     severity: "warn",
     description: "Offline path expects party already used in Daml txs when known",
     evaluate: ({ facts }) => {
       if (facts.partyHasContracts === undefined) {
         return {
           pass: true,
-          detail: "partyHasContracts unset — baseline marks contract assert as bilinmiyor",
+          detail: "partyHasContracts unset - contract assert left to operator",
         };
       }
       if (facts.partyHasContracts) {
@@ -164,13 +165,13 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
       return {
         pass: true,
         detail:
-          "partyHasContracts=false — docs suggest simple replication if party never participated; offline may be wrong path",
+          "partyHasContracts=false - docs suggest simple replication if party never participated; offline may be wrong path",
       };
     },
   },
   {
     id: "party_not_already_on_target",
-    baselineRef: "Adım 3/10: target party'yi replication İLE almalı (öncesinde değil)",
+    baselineRef: "Step 3/10: target should receive party via replication",
     severity: "warn",
     description: "Party should not already be hosted on target before replication",
     evaluate: ({ facts }) => {
@@ -178,7 +179,7 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
         return {
           pass: true,
           detail:
-            "partyAlreadyOnTarget=true — replication may already be complete or in progress; " +
+            "partyAlreadyOnTarget=true - replication may already be complete or in progress; " +
             "resume the original run instead of starting a fresh one",
         };
       }
@@ -187,13 +188,13 @@ export const PREFLIGHT_CHECKS: readonly PreflightCheck[] = [
         detail:
           facts.partyAlreadyOnTarget === false
             ? "partyAlreadyOnTarget=false"
-            : "partyAlreadyOnTarget unset (stub facts — live probe fills this)",
+            : "partyAlreadyOnTarget unset (stub facts - live probe fills this)",
       };
     },
   },
   {
     id: "acs_mismatch_expected_info",
-    baselineRef: "Beklenen gürültü: onboarding ACS commitment mismatch",
+    baselineRef: "Expected noise: ACS commitment mismatch during onboarding",
     severity: "info",
     description: "ACS commitment mismatches during onboarding are expected",
     evaluate: () => ({
@@ -252,7 +253,7 @@ export function evaluatePreflight(
 
 export function formatPreflightReport(report: PreflightReport): string {
   const lines = [
-    `preflight: ${report.ok ? "PASS" : "FAIL"}`,
+    section(`preflight ${report.ok ? "PASS" : "FAIL"}`),
     "",
   ];
   for (const r of report.results) {
@@ -264,14 +265,23 @@ export function formatPreflightReport(report: PreflightReport): string {
         : r.severity === "warn"
           ? "WRN"
           : "INF";
-    lines.push(`[${mark}] ${r.id}`);
-    lines.push(`      ${r.description}`);
-    lines.push(`      baseline: ${r.baselineRef}`);
-    lines.push(`      ${r.detail}`);
+    lines.push(`  [${mark}]  ${r.id}`);
+    lines.push(kv("check", r.description));
+    lines.push(kv("baseline", r.baselineRef));
+    lines.push(kv("detail", r.detail));
+    lines.push("");
   }
   if (!report.ok) {
-    lines.push("");
-    lines.push(`blocked: ${report.errors.length} error(s) — fix facts/config before cro apply`);
+    lines.push(rule());
+    lines.push(
+      `  BLOCKED: ${report.errors.length} error(s). Fix facts/config, then re-run preflight before apply.`,
+    );
+    for (const e of report.errors) {
+      lines.push(bullet(e.id));
+    }
+  } else {
+    lines.push(rule());
+    lines.push("  Ready for: cro apply --run <id>");
   }
   return lines.join("\n");
 }
